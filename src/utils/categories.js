@@ -1,8 +1,8 @@
 export const CATEGORIES = [
   'All',
-  'Food 🍔',
-  'Transport 🚗',
-  'Bills ⚡',
-  'Shopping 🛍️',
-  'Entertainment 🎬'
+  'Food',
+  'Transport',
+  'Bills',
+  'Shopping',
+  'Entertainment'
 ];

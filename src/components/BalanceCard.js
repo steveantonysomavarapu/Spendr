@@ -1,7 +1,7 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 
-export function BalanceCard({ totalSpent, remainingBudget }) {
+export function BalanceCard({ totalSpent, remainingBudget, monthlyBudget, onEditBudget }) {
   return (
     <View style={styles.cardRow}>
       <View style={[styles.card, styles.spentCard]}>
@@ -9,12 +9,16 @@ export function BalanceCard({ totalSpent, remainingBudget }) {
         <Text style={styles.cardValue}>${totalSpent.toFixed(2)}</Text>
       </View>
 
-      <View style={[styles.card, styles.budgetCard]}>
-        <Text style={styles.cardLabel}>Budget Remaining</Text>
+      <TouchableOpacity style={[styles.card, styles.budgetCard]} onPress={onEditBudget} activeOpacity={0.8}>
+        <View style={styles.budgetHeader}>
+          <Text style={styles.cardLabel}>Budget Remaining</Text>
+          <Text style={styles.editBadge}>Edit</Text>
+        </View>
         <Text style={[styles.cardValue, remainingBudget < 0 && { color: '#ef4444' }]}>
           ${remainingBudget.toFixed(2)}
         </Text>
-      </View>
+        <Text style={styles.targetSubtext}>Target: ${monthlyBudget.toFixed(2)}</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -43,6 +47,25 @@ const styles = StyleSheet.create({
     color: '#cbd5e1',
     fontSize: 13,
     marginBottom: 4
+  },
+  budgetHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center'
+  },
+  editBadge: {
+    color: '#34d399',
+    fontSize: 11,
+    fontWeight: 'bold',
+    backgroundColor: '#065f46',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6
+  },
+  targetSubtext: {
+    color: '#a7f3d0',
+    fontSize: 11,
+    marginTop: 4
   },
   cardValue: {
     color: '#ffffff',

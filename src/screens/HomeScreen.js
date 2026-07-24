@@ -6,7 +6,9 @@ import {
   TouchableOpacity,
   FlatList,
   SafeAreaView,
-  StatusBar
+  StatusBar,
+  Modal,
+  TextInput
 } from 'react-native';
 
 import { BalanceCard } from '../components/BalanceCard.js';
@@ -17,18 +19,20 @@ import { currentUser } from '../config/firebase.js';
 
 export function HomeScreen() {
   const [expenses, setExpenses] = useState([
-    { id: '1', title: 'Groceries at Supermarket', amount: 45.50, category: 'Food 🍔', date: '2026-07-20' },
-    { id: '2', title: 'Uber ride to campus', amount: 14.20, category: 'Transport 🚗', date: '2026-07-21' },
-    { id: '3', title: 'Monthly Electricity Bill', amount: 65.00, category: 'Bills ⚡', date: '2026-07-21' },
-    { id: '4', title: 'Movie Ticket & Snacks', amount: 22.00, category: 'Entertainment 🎬', date: '2026-07-22' }
+    { id: '1', title: 'Groceries at Supermarket', amount: 45.50, category: 'Food', date: '2026-07-20' },
+    { id: '2', title: 'Uber ride to campus', amount: 14.20, category: 'Transport', date: '2026-07-21' },
+    { id: '3', title: 'Monthly Electricity Bill', amount: 65.00, category: 'Bills', date: '2026-07-21' },
+    { id: '4', title: 'Movie Ticket & Snacks', amount: 22.00, category: 'Entertainment', date: '2026-07-22' }
   ]);
 
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [modalVisible, setModalVisible] = useState(false);
+  const [monthlyBudget, setMonthlyBudget] = useState(1000);
+  const [budgetModalVisible, setBudgetModalVisible] = useState(false);
+  const [tempBudgetInput, setTempBudgetInput] = useState('1000');
 
   // Totals calculation
   const totalSpent = expenses.reduce((sum, item) => sum + Number(item.amount), 0);
-  const monthlyBudget = 1000;
   const remainingBudget = monthlyBudget - totalSpent;
 
   // Filtering
@@ -49,14 +53,23 @@ export function HomeScreen() {
     setExpenses(expenses.filter(item => item.id !== id));
   };
 
+  const handleSaveBudget = () => {
+    const parsed = parseFloat(tempBudgetInput);
+    if (!isNaN(parsed) && parsed >= 0) {
+      setMonthlyBudget(parsed);
+    }
+    setBudgetModalVisible(false);
+  };
+
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#0f172a" />
+    <View style={{ flex: 1, backgroundColor: '#0f172a' }}>
+      <SafeAreaView style={styles.container}>
+        <StatusBar barStyle="light-content" backgroundColor="#0f172a" />
 
       {/* Header & User Badge */}
       <View style={styles.header}>
         <View>
-          <Text style={styles.appTitle}>Spendr 💸</Text>
+          <Text style={styles.appTitle}>Spendr</Text>
           <Text style={styles.subtitle}>Production Expense Tracker</Text>
         </View>
         <View style={styles.userBadge}>
@@ -65,7 +78,15 @@ export function HomeScreen() {
       </View>
 
       {/* Balance Summary Card Component */}
-      <BalanceCard totalSpent={totalSpent} remainingBudget={remainingBudget} />
+      <BalanceCard
+        totalSpent={totalSpent}
+        remainingBudget={remainingBudget}
+        monthlyBudget={monthlyBudget}
+        onEditBudget={() => {
+          setTempBudgetInput(monthlyBudget.toString());
+          setBudgetModalVisible(true);
+        }}
+      />
 
       {/* Category Slicer Filter Component */}
       <CategoryFilter
@@ -104,16 +125,51 @@ export function HomeScreen() {
         onClose={() => setModalVisible(false)}
         onAdd={handleAddExpense}
       />
+
+      {/* Edit Budget Modal Component */}
+      <Modal visible={budgetModalVisible} animationType="fade" transparent={true}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Set Monthly Budget</Text>
+            <Text style={styles.inputLabel}>New Budget Amount ($)</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="1000"
+              placeholderTextColor="#94a3b8"
+              keyboardType="numeric"
+              value={tempBudgetInput}
+              onChangeText={setTempBudgetInput}
+            />
+            <View style={styles.modalActions}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.cancelButton]}
+                onPress={() => setBudgetModalVisible(false)}
+              >
+                <Text style={styles.cancelText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.saveButton]}
+                onPress={handleSaveBudget}
+              >
+                <Text style={styles.saveText}>Save Budget</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0f172a',
-    paddingHorizontal: 16,
-    paddingTop: 12
+    paddingHorizontal: 24,
+    paddingTop: 12,
+    width: '100%',
+    maxWidth: '98%',
+    marginHorizontal: 'auto'
   },
   header: {
     flexDirection: 'row',
@@ -175,5 +231,63 @@ const styles = StyleSheet.create({
   emptyText: {
     color: '#64748b',
     fontSize: 14
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.75)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20
+  },
+  modalContent: {
+    backgroundColor: '#1e293b',
+    padding: 24,
+    borderRadius: 20,
+    width: '100%',
+    maxWidth: 400
+  },
+  modalTitle: {
+    color: '#f8fafc',
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 16
+  },
+  inputLabel: {
+    color: '#cbd5e1',
+    fontSize: 13,
+    marginBottom: 6
+  },
+  input: {
+    backgroundColor: '#0f172a',
+    color: '#ffffff',
+    padding: 12,
+    borderRadius: 10,
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: '#334155'
+  },
+  modalActions: {
+    flexDirection: 'row',
+    gap: 12
+  },
+  modalButton: {
+    flex: 1,
+    padding: 14,
+    borderRadius: 12,
+    alignItems: 'center'
+  },
+  cancelButton: {
+    backgroundColor: '#334155'
+  },
+  cancelText: {
+    color: '#cbd5e1',
+    fontWeight: 'bold'
+  },
+  saveButton: {
+    backgroundColor: '#6366f1'
+  },
+  saveText: {
+    color: '#ffffff',
+    fontWeight: 'bold'
   }
 });

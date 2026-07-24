@@ -5,7 +5,7 @@ import { CATEGORIES } from '../utils/categories.js';
 export function AddExpenseModal({ visible, onClose, onAdd }) {
   const [title, setTitle] = useState('');
   const [amount, setAmount] = useState('');
-  const [category, setCategory] = useState('Food 🍔');
+  const [category, setCategory] = useState('Food');
 
   const handleSubmit = () => {
     if (!title.trim() || !amount || isNaN(amount) || Number(amount) <= 0) {

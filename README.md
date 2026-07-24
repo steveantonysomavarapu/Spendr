@@ -23,3 +23,7 @@ npm install
 # Start Expo dev server
 npm start
 ```
+
+
+## Bootcamp Final Submission
+This project was developed as the final Capstone for the Mobile Technology Bootcamp, fulfilling all requirements including Expo development, state management, and Firebase Auth.
